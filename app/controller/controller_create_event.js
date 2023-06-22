@@ -1,4 +1,5 @@
 const CreateEvent = require ("../models/model_create_event");
+const jwt = require('jsonwebtoken');
 
 async function getEvent(req, res) {
     let getCreateEvent = await CreateEvent.getEvent();
@@ -6,10 +7,10 @@ async function getEvent(req, res) {
     res.send(getCreateEvent);
   }
 
-  async function getEventById(req, res) {
+  async function getEventByEmail(req, res) {
     try {
-      const eventId = req.params.id;
-      const event = await CreateEvent.getEventById(eventId);
+      const email = req.params.email;
+      const event = await CreateEvent.getEventByEmail(email);
       if (event) {
         console.log("Event found:", event);
         res.send(event);
@@ -25,7 +26,18 @@ async function getEvent(req, res) {
 
 async function createEvent(req, res) {
   try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const email = decoded.email;
+
+
+    req.body.email = email;
+
+    console.log("trial");
+    console.log(email);
     let addCreateEvent = await CreateEvent.addEvent(req.body);
+    console.log("try")
+    console.log(req.body);
     res.send("Added successfully");
   } catch (error) {
     res.render("error");
@@ -67,4 +79,4 @@ async function deleteEvent(req, res) {
     }
   }
 
-module.exports = {getEvent, getEventById, createEvent, deleteEvent, updateEvent}
+module.exports = {getEvent, getEventByEmail, createEvent, deleteEvent, updateEvent}

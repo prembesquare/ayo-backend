@@ -9,8 +9,8 @@ const client = new Client({
 });
 
 client.connect();
-client
-  .query("select now()")
-  .then((res) => logger.info("Connected to the db " + res.rows[0].now));
+// client
+//   .query("select now()")
+//   .then((res) => logger.info("Connected to the db " + res.rows[0].now));
 
 module.exports = client;

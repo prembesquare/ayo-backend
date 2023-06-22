@@ -12,7 +12,7 @@ CREATE TABLE ayo_drc_schema.tableRegister (
     id BIGSERIAL PRIMARY KEY NOT NULL,
     name VARCHAR(255),
     email VARCHAR(255),
-    password varchar(255),
+    password VARCHAR(255),
     UNIQUE (email)
 );
 
@@ -22,11 +22,10 @@ CREATE TABLE ayo_drc_schema.tablecreateevent (
     event_name VARCHAR(255),
     event_date DATE,
     event_time TIME,
-    event_address VARCHAR(255)
+    event_address VARCHAR(255),
+    event_detail VARCHAR(255),
+    event_rsvp_before DATE,
+    email VARCHAR(255) NOT NULL
 );
-
-CREATE TABLE test (
-    id VARCHAR(20)
-)
 
 
