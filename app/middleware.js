@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 
 function jwtMiddleware(req, res, next) {
   const token = req.headers.authorization.split(" ")[1];
-  // console.log(token);
 
   if (!token) {
     return res.status(401).json({ error: 'No token provided' });
@@ -17,26 +16,8 @@ function jwtMiddleware(req, res, next) {
     }
 
     req.email = decoded.email;
-    // console.log(decoded.email);
     next();
   });
 }
 
 module.exports = jwtMiddleware;
-
-
-// function jwtMiddleware(req, res, next) {
-//   const token = req.headers.authorization.split(" ")[1];
-//   console.log(token);
-
-//   try{
-//     const token = req.headers.authorization.split(" ")[1];
-//   console.log(token);
-
-//   const decoded = jwt.verify(token, process.env.SECRET_KEY)
-//   req.email = decoded;
-//   next();
-//   } catch (error){
-//     return res.status(401).json({ error: 'No token provided' });
-//   }
-// }

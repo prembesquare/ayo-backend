@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 
 async function createUser({ name, email, password }) {
   const query =
-    "INSERT INTO ayo_drc_schema.tableRegister (name, email, password) VALUES ($1, $2, $3) RETURNING *";
+    "INSERT INTO ayo_drc_schema.tableuser (name, email, password) VALUES ($1, $2, $3) RETURNING *";
   const hashedPassword = await hashPassword(password);
   const values = [name, email, hashedPassword];
 
@@ -27,7 +27,7 @@ async function hashPassword(password) {
 
 async function findUserByEmail(email) {
   try {
-    const query = "SELECT * FROM ayo_drc_schema.tableRegister WHERE email = $1";
+    const query = "SELECT * FROM ayo_drc_schema.tableuser WHERE email = $1";
     const resp = await client.query(query, [email]);
     return resp.rows[0];
   } catch (e) {

@@ -16,11 +16,6 @@ async function registerUser(req, res) {
     });
     console.log(newUser);
 
-    // // Generate JWT token
-    // const token = jwt.sign({ email: newUser.email });
-
-    // console.log(token);
-
     res.status(201).json({
       message: "User registered successfully",
       user: newUser.name,
@@ -56,9 +51,7 @@ async function loginUser(req, res) {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY);
 
     res.status(200).json({
       message: "User logged in successfully",
