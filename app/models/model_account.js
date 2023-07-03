@@ -25,6 +25,18 @@ async function hashPassword(password) {
   return hashedPassword;
 }
 
+async function updateUserPassword(userId, newPassword) {
+  const query = "UPDATE ayo_drc_schema.tableuser SET password = $1 WHERE id = $2";
+  const values = [newPassword, userId];
+
+  try {
+    await client.query(query, values);
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to update user password");
+  }
+}
+
 async function findUserByEmail(email) {
   try {
     const query = "SELECT * FROM ayo_drc_schema.tableuser WHERE email = $1";
@@ -36,4 +48,4 @@ async function findUserByEmail(email) {
   }
 }
 
-module.exports = { createUser, findUserByEmail, hashPassword };
+module.exports = { createUser, findUserByEmail, hashPassword, updateUserPassword };
