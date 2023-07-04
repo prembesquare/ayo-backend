@@ -1,5 +1,5 @@
 const CreateEvent = require("../models/model_create_event");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 async function getEvent(req, res) {
   try {
@@ -29,10 +29,10 @@ async function getEventByEmail(req, res) {
   }
 }
 
-async function getEventByInvitedEmail(req, res) {
+async function getEventByinviteeEmail(req, res) {
   try {
-    const invitedEmail = req.params.invited_email;
-    const events = await CreateEvent.getEventByInvitedEmail(invitedEmail);
+    const inviteeEmail = req.params.invitee_email;
+    const events = await CreateEvent.getEventByinviteeEmail(inviteeEmail);
     if (events.length > 0) {
       console.log("Events found:", events);
       res.status(200).json(events);
@@ -106,8 +106,8 @@ async function updateEvent(req, res) {
 module.exports = {
   getEvent,
   getEventByEmail,
-  getEventByInvitedEmail,
+  getEventByinviteeEmail,
   createEvent,
   deleteEvent,
-  updateEvent
+  updateEvent,
 };

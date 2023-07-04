@@ -31,12 +31,12 @@ CREATE TABLE ayo_drc_schema.tablecreateevent (
     FOREIGN KEY (email) REFERENCES ayo_drc_schema.tableuser(email)
 );
 
--- create table for invited emails
-CREATE TABLE ayo_drc_schema.tableinvitedemail (
-    invited_id BIGSERIAL PRIMARY KEY NOT NULL,
+-- create table for invitee emails
+CREATE TABLE ayo_drc_schema.tableinviteeemail (
+    invitee_id BIGSERIAL PRIMARY KEY NOT NULL,
     event_id BIGINT,
-    invited_email VARCHAR(255),
-    UNIQUE (invited_email),
+    invitee_email VARCHAR(255),
+    UNIQUE (invitee_email),
     FOREIGN KEY (event_id) REFERENCES ayo_drc_schema.tablecreateevent(event_id)
 );
 
@@ -45,8 +45,8 @@ CREATE TABLE ayo_drc_schema.tablersvp (
     rsvp_id BIGSERIAL PRIMARY KEY NOT NULL,
     event_code VARCHAR(255) NOT NULL,
     rsvp_status VARCHAR(255),
-    invited_email VARCHAR(255) NOT NULL,
-    UNIQUE (invited_email),
+    invitee_email VARCHAR(255) NOT NULL,
+    UNIQUE (invitee_email),
     FOREIGN KEY (event_code) REFERENCES ayo_drc_schema.tablecreateevent(event_code),
-    FOREIGN KEY (invited_email) REFERENCES ayo_drc_schema.tableinvitedemail(invited_email)
+    FOREIGN KEY (invitee_email) REFERENCES ayo_drc_schema.tableinviteeemail(invitee_email)
 );

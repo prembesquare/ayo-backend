@@ -5,10 +5,10 @@ async function createRSVP(req, res) {
   try {
     const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    const invitedEmail = decoded.email;
+    const inviteeEmail = decoded.email;
     const eventCode = req.body.event_code;
 
-    req.body.invited_email = invitedEmail;
+    req.body.invitee_email = inviteeEmail;
     req.body.event_code = eventCode;
 
     const addRSVP = await RSVP.addRSVP(req.body);
@@ -24,7 +24,6 @@ async function createRSVP(req, res) {
     res.status(500).render("Internal server error");
   }
 }
-
 
 async function getRSVPByStatus(req, res) {
   try {
