@@ -92,13 +92,13 @@ async function addEvent({
       const transporter = nodemailer.createTransport({
         service: "Gmail",
         auth: {
-          user: "prem@besquare.com.my",
-          pass: "orrewqpwzocwhopu",
+          user: "ayoevents12@gmail.com",
+          pass: "zvtnlzqbugvqhumj",
         },
       });
 
       const mailOptions = {
-        from: 'prem@besquare.com.my',
+        from: 'ayoevents12@gmail.com',
         subject: 'You have been invited to an event',
         html: `<p>You have been invited to the event ${event_name}. Click <a href="http://your-app.com/events/${eventCode}">here</a> to view the event.</p>`
       };
