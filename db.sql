@@ -24,7 +24,8 @@ CREATE TABLE ayo_drc_schema.tablecreateevent (
     event_time TIME,
     event_address VARCHAR(255),
     event_detail VARCHAR(255),
-    event_rsvp_before DATE,
+    event_rsvp_before_date DATE,
+    event_rsvp_before_time TIME,
     event_code VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     UNIQUE (event_code),
@@ -34,10 +35,9 @@ CREATE TABLE ayo_drc_schema.tablecreateevent (
 -- create table for invitee emails
 CREATE TABLE ayo_drc_schema.tableinviteeemail (
     invitee_id BIGSERIAL PRIMARY KEY NOT NULL,
-    event_id BIGINT,
+    event_code VARCHAR(255),
     invitee_email VARCHAR(255),
-    UNIQUE (invitee_email),
-    FOREIGN KEY (event_id) REFERENCES ayo_drc_schema.tablecreateevent(event_id)
+    FOREIGN KEY (event_code) REFERENCES ayo_drc_schema.tablecreateevent(event_code)
 );
 
 --create table for rsvp response
@@ -45,8 +45,8 @@ CREATE TABLE ayo_drc_schema.tablersvp (
     rsvp_id BIGSERIAL PRIMARY KEY NOT NULL,
     event_code VARCHAR(255) NOT NULL,
     rsvp_status VARCHAR(255),
-    invitee_email VARCHAR(255) NOT NULL,
-    UNIQUE (invitee_email),
+    invitee_id BIGINT,
+    UNIQUE (event_code, invitee_id),
     FOREIGN KEY (event_code) REFERENCES ayo_drc_schema.tablecreateevent(event_code),
-    FOREIGN KEY (invitee_email) REFERENCES ayo_drc_schema.tableinviteeemail(invitee_email)
+    FOREIGN KEY (invitee_id) REFERENCES ayo_drc_schema.tableinviteeemail(invitee_id)
 );

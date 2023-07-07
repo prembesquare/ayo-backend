@@ -7,6 +7,7 @@ async function createRSVP(req, res) {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const inviteeEmail = decoded.email;
     const eventCode = req.body.event_code;
+    console.log(inviteeEmail);
 
     req.body.invitee_email = inviteeEmail;
     req.body.event_code = eventCode;
