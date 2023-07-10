@@ -2,6 +2,7 @@ const express = require("express");
 const { body } = require("express-validator");
 const router = express.Router();
 const userController = require("../controller/controller_account");
+const jwtMiddleware = require('../middleware');
 
 // Register User
 router.post("/register",
@@ -25,6 +26,9 @@ router.post("/login", userController.loginUser);
 
 //Forgot Password
 router.post("/forgot-password", userController.forgetPassword);
+
+//Update Password
+router.put("/update", jwtMiddleware, userController.updateUserPassword);
 
 //Logout User
 router.post("/logout", userController.logoutUser);

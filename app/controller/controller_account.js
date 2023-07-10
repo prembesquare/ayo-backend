@@ -115,6 +115,33 @@ async function forgetPassword (req, res) {
   }
 }
 
+async function updateUserPassword(req, res) {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const email = decoded.email;
+
+    const user = await User.findUserByEmail(email);
+  
+    const { currentPassword, newPassword } = req.body;
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid current password" });
+    }
+
+    const hashedPassword = await User.hashPassword(newPassword);
+
+    await User.updateUserPassword(user.id, hashedPassword);
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update user password" });
+  }
+}
+
+
+
 async function logoutUser(req, res) {
   try {
     res.status(200).json({ message: "User logged out successfully" });
@@ -124,4 +151,4 @@ async function logoutUser(req, res) {
   }
 }
 
-module.exports = { registerUser, loginUser, forgetPassword, logoutUser };
+module.exports = { registerUser, loginUser, forgetPassword, updateUserPassword, logoutUser };
