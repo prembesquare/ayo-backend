@@ -131,15 +131,25 @@ async function deleteEvent(eventCode) {
 
     const deleteInviteeEmailQuery =
       'DELETE FROM ayo_drc_schema.tableinviteeemail WHERE event_code = $1';
-    await client.query(deleteInviteeEmailQuery, [eventCode]);
+    const deleteInviteeEmailResult = await client.query(
+      deleteInviteeEmailQuery,
+      [eventCode]
+    );
 
     const deleteEventQuery =
       'DELETE FROM ayo_drc_schema.tablecreateevent WHERE event_code = $1';
-    const resp = await client.query(deleteEventQuery, [eventCode]);
+    const deleteEventResult = await client.query(deleteEventQuery, [eventCode]);
 
     await client.query('COMMIT');
 
-    return resp;
+    if (
+      deleteInviteeEmailResult.rowCount === 0 &&
+      deleteEventResult.rowCount === 0
+    ) {
+      return false;
+    }
+
+    return true;
   } catch (e) {
     await client.query('ROLLBACK');
     console.error(e);
@@ -149,8 +159,7 @@ async function deleteEvent(eventCode) {
   }
 }
 
-
-async function updateEvent(eventId, eventData) {
+async function updateEvent(eventCode, eventData) {
   try {
     const {
       event_name,
@@ -158,13 +167,14 @@ async function updateEvent(eventId, eventData) {
       event_time,
       event_address,
       event_detail,
-      event_rsvp_before,
-      event_code,
+      event_rsvp_before_date,
+      event_rsvp_before_time,
     } = eventData;
-    await client.query("BEGIN");
+
+    await client.query('BEGIN');
 
     const updateEventQuery =
-      "UPDATE ayo_drc_schema.tablecreateevent SET event_name = $1, event_date = $2, event_time = $3, event_address = $4, event_detail = $5, event_rsvp_before = $6, event_code = $7 WHERE event_id = $8";
+      'UPDATE ayo_drc_schema.tablecreateevent SET event_name = $1, event_date = $2, event_time = $3, event_address = $4, event_detail = $5, event_rsvp_before_date = $6, event_rsvp_before_time = $7 WHERE event_code = $8';
     const eventValues = [
       event_name,
       event_date,
@@ -173,34 +183,29 @@ async function updateEvent(eventId, eventData) {
       event_detail,
       event_rsvp_before_date,
       event_rsvp_before_time,
-      event_code,
-      eventId,
+      eventCode,
     ];
     await client.query(updateEventQuery, eventValues);
 
-    if (eventData.invitee_email) {
-      const deleteinviteeEmailQuery =
-        "DELETE FROM ayo_drc_schema.tableinviteeemail WHERE event_id = $1";
-      await client.query(deleteinviteeEmailQuery, [eventId]);
-
-      const insertinviteeEmailQuery =
-        "INSERT INTO ayo_drc_schema.tableinviteeemail (event_id, invitee_email) VALUES ($1, $2)";
+    if (eventData.invitee_email && eventData.invitee_email.length > 0) {
+      const insertInviteeEmailQuery =
+        'INSERT INTO ayo_drc_schema.tableinviteeemail (event_code, invitee_email) VALUES ($1, $2)';
       const inviteeEmailValues = eventData.invitee_email.map((email) => [
-        eventId,
+        eventCode,
         email,
       ]);
       await Promise.all(
         inviteeEmailValues.map((values) =>
-          client.query(insertinviteeEmailQuery, values)
+          client.query(insertInviteeEmailQuery, values)
         )
       );
     }
 
-    await client.query("COMMIT");
+    await client.query('COMMIT');
 
-    return { event_id: eventId };
+    return { event_code: eventCode };
   } catch (e) {
-    await client.query("ROLLBACK");
+    await client.query('ROLLBACK');
     console.error(e);
     return undefined;
   }
