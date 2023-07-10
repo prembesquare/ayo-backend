@@ -123,20 +123,32 @@ async function addEvent({
 
 async function deleteEvent(eventCode) {
   try {
-    const deleteinviteeEmailQuery =
-      "DELETE FROM ayo_drc_schema.tableinviteeemail WHERE event_code = $1";
-    await client.query(deleteinviteeEmailQuery, [eventCode]);
+    await client.query('BEGIN');
+
+    const deleteRsvpQuery =
+      'DELETE FROM ayo_drc_schema.tablersvp WHERE event_code = $1';
+    await client.query(deleteRsvpQuery, [eventCode]);
+
+    const deleteInviteeEmailQuery =
+      'DELETE FROM ayo_drc_schema.tableinviteeemail WHERE event_code = $1';
+    await client.query(deleteInviteeEmailQuery, [eventCode]);
 
     const deleteEventQuery =
-      "DELETE FROM ayo_drc_schema.tablecreateevent WHERE event_code = $1";
+      'DELETE FROM ayo_drc_schema.tablecreateevent WHERE event_code = $1';
     const resp = await client.query(deleteEventQuery, [eventCode]);
+
+    await client.query('COMMIT');
 
     return resp;
   } catch (e) {
+    await client.query('ROLLBACK');
     console.error(e);
     return undefined;
+  } finally {
+    await client.query('END');
   }
 }
+
 
 async function updateEvent(eventId, eventData) {
   try {

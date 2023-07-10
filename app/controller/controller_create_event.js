@@ -70,8 +70,8 @@ async function createEvent(req, res) {
 
 async function deleteEvent(req, res) {
   try {
-    const eventId = req.params.id;
-    const result = await CreateEvent.deleteEvent(eventId);
+    const eventCode = req.params.event_code;
+    const result = await CreateEvent.deleteEvent(eventCode);
     if (result) {
       console.log("Event deleted successfully");
       res.status(200).json({ message: "Event deleted successfully" });
@@ -87,9 +87,9 @@ async function deleteEvent(req, res) {
 
 async function updateEvent(req, res) {
   try {
-    const eventId = req.params.id;
+    const eventCode = req.params.event_code;
     const eventData = req.body;
-    const result = await CreateEvent.updateEvent(eventId, eventData);
+    const result = await CreateEvent.updateEvent(eventCode, eventData);
     if (result) {
       console.log("Event updated successfully");
       res.status(200).json({ message: "Event updated successfully" });
