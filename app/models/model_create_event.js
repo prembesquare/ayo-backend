@@ -38,6 +38,18 @@ async function getEventByinviteeEmail(inviteeEmail) {
   }
 }
 
+async function getEventByEventCode(eventCode) {
+  try {
+    const query =
+      "SELECT * FROM ayo_drc_schema.tablecreateevent WHERE event_code = $1";
+    const resp = await client.query(query, [eventCode]);
+    return resp.rows;
+  } catch (e) {
+    console.error(e);
+    return undefined;
+  }
+}
+
 async function addEvent({
   event_name,
   event_date,
@@ -215,7 +227,8 @@ module.exports = {
   getEvent,
   getEventByEmail,
   getEventByinviteeEmail,
+  getEventByEventCode,
   addEvent,
   deleteEvent,
-  updateEvent,
+  updateEvent
 };

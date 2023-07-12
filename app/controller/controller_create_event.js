@@ -46,6 +46,19 @@ async function getEventByinviteeEmail(req, res) {
   }
 }
 
+async function getEventByEventCode(req, res) {
+  const eventCode = req.params.event_code;
+  const events = await CreateEvent.getEventByEventCode(eventCode);
+  try {
+    const eventCode = await CreateEvent.getEventByEventCode();
+    console.log(events);
+    res.status(200).json(events);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
 async function createEvent(req, res) {
   try {
     const token = req.headers.authorization.split(" ")[1];
@@ -107,7 +120,8 @@ module.exports = {
   getEvent,
   getEventByEmail,
   getEventByinviteeEmail,
+  getEventByEventCode,
   createEvent,
   deleteEvent,
-  updateEvent,
+  updateEvent
 };
