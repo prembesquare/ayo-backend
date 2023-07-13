@@ -43,4 +43,39 @@ async function getRSVPByStatus(req, res) {
   }
 }
 
-module.exports = { createRSVP, getRSVPByStatus };
+async function getYesStatus(req, res) {
+  try {
+    const eventCode = req.params.event_code;
+    const rsvp = await RSVP.getYesStatus(eventCode);
+    if (rsvp) {
+      console.log("RSVPs found:", rsvp);
+      res.status(200).send(rsvp);
+    } else {
+      console.log("RSVPs not found");
+      res.status(404).send("RSVPs not found");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).render("error");
+  }
+}
+
+async function getNoStatus(req, res) {
+  try {
+    const eventCode = req.params.event_code;
+    const rsvp = await RSVP.getNoStatus(eventCode);
+    if (rsvp) {
+      console.log("RSVPs found:", rsvp);
+      res.status(200).send(rsvp);
+    } else {
+      console.log("RSVPs not found");
+      res.status(404).send("RSVPs not found");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).render("error");
+  }
+}
+
+
+module.exports = { createRSVP, getRSVPByStatus, getYesStatus, getNoStatus };
