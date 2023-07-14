@@ -37,7 +37,7 @@ async function getRSVPByStatus(rsvpStatus) {
 async function getYesStatus(event_code) {
   try {
     const query = `
-      SELECT t1.*, t2.invitee_email
+      SELECT t2.invitee_email
       FROM ayo_drc_schema.tablersvp AS t1
       JOIN ayo_drc_schema.tableinviteeemail AS t2 ON t1.invitee_id = t2.invitee_id
       WHERE t1.event_code = $1 AND t1.rsvp_status = 'Yes'`;
@@ -52,7 +52,7 @@ async function getYesStatus(event_code) {
 async function getNoStatus(event_code) {
   try {
     const query = `
-      SELECT t1.*, t2.invitee_email
+      SELECT t2.invitee_email
       FROM ayo_drc_schema.tablersvp AS t1
       JOIN ayo_drc_schema.tableinviteeemail AS t2 ON t1.invitee_id = t2.invitee_id
       WHERE t1.event_code = $1 AND t1.rsvp_status = 'No'`;
