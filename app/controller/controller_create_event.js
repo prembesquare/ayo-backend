@@ -1,5 +1,6 @@
 const CreateEvent = require("../models/model_create_event");
 const jwt = require("jsonwebtoken");
+const { validationResult } = require('express-validator');
 
 async function getEvent(req, res) {
   try {
@@ -60,6 +61,10 @@ async function getEventByEventCode(req, res) {
 }
 
 async function createEvent(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
