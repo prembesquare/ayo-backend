@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const nodemailer = require("nodemailer");
 const randomstring = require("randomstring");
+const { generateAccessToken, generateRefreshToken } = require('../Utils/utils');
 
 async function registerUser(req, res) {
   try {
@@ -60,13 +61,15 @@ async function loginUser(req, res) {
       return res.status(401).json({ error: "Invalid password" });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY, {expiresIn: "1d"});
+    // Generate access token and refresh token
+    const accessToken = generateAccessToken(user.email);
+    const refreshToken = generateRefreshToken(user.email);
 
     res.status(200).json({
       message: "User logged in successfully",
       user: user,
-      token: token,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     });
   } catch (error) {
     console.error(error);
