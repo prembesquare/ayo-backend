@@ -16,7 +16,7 @@ router.post("/add",
     .withMessage('Event address must be maximum 100 characters'),
   body('event_detail')
     .isLength({ max: 250 })
-    .withMessage('Event detail must be maximum 100 characters'),
+    .withMessage('Event detail must be maximum 250 characters'),
   body('event_code')
     .isLength({ max: 20 })
     .withMessage('Event code must be maximum 20 characters')

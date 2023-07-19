@@ -15,6 +15,7 @@ Sure, I can help you link the titles to their respective divisions. Here's the m
    - [Manually Running Containers](#manually-running-containers)
 6. [API Documentation](#api-documentation)
 7. [Technologies Used](#technologies-used)
+7. [ERD Diagram](#erd-diagram)
 
 ## Introduction
 
@@ -578,3 +579,7 @@ The Ayo Event Management application backend source code utilizes the following 
 2. Express.js - A fast and minimalist web framework for Node.js.
 3. PostgreSQL - A powerful open-source relational database system.
 4. Docker - A platform for developing, shipping, and running applications in containers.
+
+## ERD Diagram
+
+![Alt text](<ERD Diagram.png>)

@@ -87,7 +87,7 @@ async function forgetPassword(req, res, next) {
       service: "Gmail",
       auth: {
         user: "ayoevents12@gmail.com",
-        pass: "zvtnlzqbugvqhumj",
+        pass: process.env.EMAIL_KEY,
       },
     });
 

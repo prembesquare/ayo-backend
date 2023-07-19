@@ -10,9 +10,9 @@ CREATE SCHEMA IF NOT EXISTS ayo_drc_schema;
 -- create table for user
 CREATE TABLE ayo_drc_schema.tableuser (
     id BIGSERIAL PRIMARY KEY NOT NULL,
-    name VARCHAR(50),
-    email VARCHAR(50),
-    password VARCHAR(16),
+    name VARCHAR(255),
+    email VARCHAR(255),
+    password VARCHAR(255),
     UNIQUE (email)
 );
 
@@ -23,7 +23,7 @@ CREATE TABLE ayo_drc_schema.tablecreateevent (
     event_date DATE,
     event_time TIME,
     event_address VARCHAR(100),
-    event_detail VARCHAR(100),
+    event_detail VARCHAR(250),
     event_rsvp_before_date DATE,
     event_rsvp_before_time TIME,
     event_code VARCHAR(20) NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE ayo_drc_schema.tablecreateevent (
 -- create table for invitee emails
 CREATE TABLE ayo_drc_schema.tableinviteeemail (
     invitee_id BIGSERIAL PRIMARY KEY NOT NULL,
-    event_code VARCHAR(255),
+    event_code VARCHAR(20),
     invitee_email VARCHAR(255),
     FOREIGN KEY (event_code) REFERENCES ayo_drc_schema.tablecreateevent(event_code)
 );
@@ -43,8 +43,8 @@ CREATE TABLE ayo_drc_schema.tableinviteeemail (
 --create table for rsvp response
 CREATE TABLE ayo_drc_schema.tablersvp (
     rsvp_id BIGSERIAL PRIMARY KEY NOT NULL,
-    event_code VARCHAR(255) NOT NULL,
-    rsvp_status VARCHAR(255),
+    event_code VARCHAR(20) NOT NULL,
+    rsvp_status VARCHAR(5),
     invitee_id BIGINT,
     UNIQUE (event_code, invitee_id),
     FOREIGN KEY (event_code) REFERENCES ayo_drc_schema.tablecreateevent(event_code),

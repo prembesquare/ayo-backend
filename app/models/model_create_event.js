@@ -117,8 +117,8 @@ async function addEvent({
 
       const mailOptions = {
         from: 'ayoevents12@gmail.com',
-        subject: 'You have been invited to an event',
-        html: `<p>You have been invited to the event ${event_name}!!!. Click <a href="http://youtube/events/${eventCode}">here</a> to view the event.</p>`
+        subject: 'You have been invited to an event!',
+        html: `<p>You have been invited to the event ${event_name}. Click <a href="http://youtube/events/${eventCode}">here</a> to view the event.</p>`
       };
 
       const sendInvitationEmails = invitee_email.map((email) => {
@@ -268,7 +268,7 @@ async function updateEvent(eventCode, eventData) {
 
       const mailOptions = {
         from: 'ayoevents12@gmail.com',
-        subject: 'You have been invited to an event',
+        subject: 'You have been invited to an event!',
         html: `<p>There's been some change to the event ${event_name}. Click <a href="http://youtube.com.my">here</a> to view the event.</p>`,
       };
 
