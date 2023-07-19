@@ -5,90 +5,83 @@ const { validationResult } = require("express-validator");
 const nodemailer = require("nodemailer");
 const randomstring = require("randomstring");
 const { generateAccessToken, generateRefreshToken } = require('../Utils/utils');
+const CustomError = require('../middleware/CustomError');
 
-async function registerUser(req, res) {
+async function registerUser(req, res, next) {
   try {
     const { name, email, password } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).send(errors.array());
     }
     const existingUser = await User.findUserByEmail(email);
-    if (existingUser) {
-      return res.status(409).json({ error: "Email already exist" });
+    if (existingUser.success) {
+      return res.status(409).send("Email already exists");
     }
     const newUser = await User.createUser({
       name: name,
       email,
       password: password,
     });
-    console.log(newUser);
-
-    res.status(201).json({
-      message: "User registered successfully",
-      user: newUser.name,
-      email: newUser.email,
-    });
+    if (newUser.success) {
+      return res.status(201).send({
+        message: "User registered successfully",
+        user: newUser.data.name,
+        email: newUser.data.email,
+      });
+    } else {
+      throw new CustomError(500, newUser.message);
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(error);
   }
 }
 
-async function loginUser(req, res) {
+async function loginUser(req, res, next) {
   try {
     const { email, password } = req.body;
     const user = await User.findUserByEmail(email);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    if (!user.success) {
+      return res.status(404).send(user.message);
     }
 
     // Hash the input password for comparison
-    const isPasswordValid = await new Promise((resolve, reject) => {
-      bcrypt.compare(password, user.password, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    });
-    console.log("hi",password);
-    console.log(user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.data.password);
 
     if (!isPasswordValid) {
-      console.log("try password invalid")
-      return res.status(401).json({ error: "Invalid password" });
+      return res.status(401).send("Invalid password");
     }
 
     // Generate access token and refresh token
-    const accessToken = generateAccessToken(user.email);
-    const refreshToken = generateRefreshToken(user.email);
+    const accessToken = generateAccessToken(user.data.email);
+    const refreshToken = generateRefreshToken(user.data.email);
 
-    res.status(200).json({
+    res.status(200).send({
       message: "User logged in successfully",
-      user: user,
+      user: user.data,
       accessToken: accessToken,
       refreshToken: refreshToken,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    next(error);
   }
 }
 
-async function forgetPassword (req, res) {
+async function forgetPassword(req, res, next) {
   try {
-    const {email} = req.body;
+    const { email } = req.body;
     const user = await User.findUserByEmail(email);
-    if(!user){
-      return res.status(404).json({error: "User not found"});
+    if (!user.success) {
+      return res.status(404).send(user.message);
     }
 
     const temporaryPassword = randomstring.generate(10);
-    const hashedTemporaryPassoword = await User.hashPassword(temporaryPassword);
+    const hashedTemporaryPassword = await User.hashPassword(temporaryPassword);
 
-    await User.updateUserPassword(user.id, hashedTemporaryPassoword);
+    const updateResult = await User.updateUserPassword(user.data.id, hashedTemporaryPassword);
+    if (!updateResult.success) {
+      throw new CustomError(500, updateResult.message);
+    }
 
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -107,50 +100,50 @@ async function forgetPassword (req, res) {
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         console.error(error);
-        return res.status(500).json({error: "Failed to sent reset password email"});
+        throw new CustomError(500, "Failed to send reset password email");
       }
       console.log("Reset password email sent " + info.response);
-      res.status(200).json({message: "Reset password email sent successfully"});
+      res.status(200).send({ message: "Reset password email sent successfully" });
     });
-  } catch(error) {
-    console.error(error);
-    res.status(500).json({error: "Internal server error"});
+  } catch (error) {
+    next(error);
   }
 }
 
-async function updateUserPassword(req, res) {
+async function updateUserPassword(req, res, next) {
   try {
     const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const email = decoded.email;
 
     const user = await User.findUserByEmail(email);
-  
+
     const { currentPassword, newPassword } = req.body;
 
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.data.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid current password" });
+      return res.status(401).send("Invalid current password");
     }
 
     const hashedPassword = await User.hashPassword(newPassword);
 
-    await User.updateUserPassword(user.id, hashedPassword);
-    res.status(200).json({ message: "Password updated successfully" });
+    const updateResult = await User.updateUserPassword(user.data.id, hashedPassword);
+    if (updateResult.success) {
+      return res.status(200).send({ message: "Password updated successfully" });
+    } else {
+      throw new CustomError(500, updateResult.message);
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to update user password" });
+    next(error);
   }
 }
 
-
-
 async function logoutUser(req, res) {
   try {
-    res.status(200).json({ message: "User logged out successfully" });
+    res.status(200).send({ message: "User logged out successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).send("Internal server error");
   }
 }
 

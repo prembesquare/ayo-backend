@@ -1,15 +1,20 @@
 const CreateEvent = require("../models/model_create_event");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require('express-validator');
+const CustomError = require('../middleware/CustomError');
 
 async function getEvent(req, res) {
   try {
     const events = await CreateEvent.getEvent();
-    console.log(events);
-    res.status(200).json(events);
+    if (events.success) {
+      console.log("Events found:", events.data);
+      res.status(200).send(events.data);
+    } else {
+      console.log(events.message);
+      throw new CustomError(500, result.message);
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(error);
   }
 }
 
@@ -17,16 +22,15 @@ async function getEventByEmail(req, res) {
   try {
     const email = req.params.email;
     const events = await CreateEvent.getEventByEmail(email);
-    if (events.length > 0) {
-      console.log("Events found:", events);
-      res.status(200).json(events);
+    if (events.success) {
+      console.log("Events found:", events.data);
+      res.status(200).send(events.data);
     } else {
-      console.log("No events found");
-      res.status(404).json({ message: "No events found" });
+      console.log(events.message);
+      throw new CustomError(500, result.message);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(error);
   }
 }
 
@@ -34,33 +38,35 @@ async function getEventByinviteeEmail(req, res) {
   try {
     const inviteeEmail = req.params.invitee_email;
     const events = await CreateEvent.getEventByinviteeEmail(inviteeEmail);
-    if (events.length > 0) {
-      console.log("Events found:", events);
-      res.status(200).json(events);
+    if (events.success) {
+      console.log("Events found:", events.data);
+      res.status(200).send(events.data);
     } else {
-      console.log("No events found");
-      res.status(404).json({ message: "No events found" });
+      console.log(events.message);
+      throw new CustomError(500, result.message);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(error);
   }
 }
 
 async function getEventByEventCode(req, res) {
-  const eventCode = req.params.event_code;
-  const events = await CreateEvent.getEventByEventCode(eventCode);
   try {
-    const eventCode = await CreateEvent.getEventByEventCode();
-    console.log(events);
-    res.status(200).json(events);
+    const eventCode = req.params.event_code;
+    const events = await CreateEvent.getEventByEventCode(eventCode);
+    if (events.success) {
+      console.log("Events found:", events.data);
+      res.status(200).send(events.data);
+    } else {
+      console.log(events.message);
+      throw new CustomError(500, result.message);
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(error);
   }
 }
 
-async function createEvent(req, res) {
+async function createEvent(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -73,16 +79,14 @@ async function createEvent(req, res) {
     req.body.email = email;
 
     const result = await CreateEvent.addEvent(req.body);
-    if (result) {
-      console.log("Event added successfully");
-      res.status(201).json({ message: "Event added successfully" });
+    if (result.success) {
+      console.log(result.data);
+      res.status(201).json(result.data);
     } else {
-      console.log("Event addition failed");
-      res.status(500).json({ error: "Event addition failed" });
+      throw new CustomError(500, result.message);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(error);
   }
 }
 
@@ -90,16 +94,15 @@ async function deleteEvent(req, res) {
   try {
     const eventCode = req.params.event_code;
     const result = await CreateEvent.deleteEvent(eventCode);
-    if (result) {
-      console.log("Event deleted successfully");
-      res.status(200).json({ message: "Event deleted successfully" });
+    if (result.success) {
+      console.log(result.data);
+      res.status(200).send(result.data);
     } else {
-      console.log("Event deletion failed");
-      res.status(500).json({ error: "Event deletion failed" });
+      console.log(result.message);
+      throw new CustomError(500, result.message);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(error);
   }
 }
 
@@ -108,16 +111,14 @@ async function updateEvent(req, res) {
     const eventCode = req.params.event_code;
     const eventData = req.body;
     const result = await CreateEvent.updateEvent(eventCode, eventData);
-    if (result) {
-      console.log("Event updated successfully");
-      res.status(200).json({ message: "Event updated successfully" });
+    if (result.success) {
+      console.log(result.data);
+      res.status(200).send(result.data);
     } else {
-      console.log("Event update failed");
-      res.status(500).json({ error: "Event update failed" });
+      throw new CustomError(500, result.message);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(error);
   }
 }
 

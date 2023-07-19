@@ -1,5 +1,6 @@
 const client = require("../db");
 const bcrypt = require("bcrypt");
+const CustomError = require('../middleware/CustomError');
 
 async function createUser({ name, email, password }) {
   const query =
@@ -9,16 +10,16 @@ async function createUser({ name, email, password }) {
 
   try {
     const result = await client.query(query, values);
-    return result.rows[0];
+    return { success: true, data: result.rows[0] };
   } catch (error) {
     console.error(error);
-    return undefined;
+    throw new CustomError(500, "Failed to create user");
   }
 }
 
 async function hashPassword(password) {
   if (!password) {
-    throw new Error("Invalid password");
+    throw new CustomError(400, "Invalid password");
   }
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -31,9 +32,10 @@ async function updateUserPassword(userId, newPassword) {
 
   try {
     await client.query(query, values);
+    return { success: true };
   } catch (error) {
     console.error(error);
-    throw new Error("Failed to update user password");
+    throw new CustomError(500, "Failed to update user password");
   }
 }
 
@@ -41,10 +43,13 @@ async function findUserByEmail(email) {
   try {
     const query = "SELECT * FROM ayo_drc_schema.tableuser WHERE email = $1";
     const resp = await client.query(query, [email]);
-    return resp.rows[0];
+    if (resp.rows.length === 0) {
+      return { success: false, message: "User not found" };
+    }
+    return { success: true, data: resp.rows[0] };
   } catch (e) {
     console.error(e);
-    return undefined;
+    throw new CustomError(500, "Failed to find user");
   }
 }
 

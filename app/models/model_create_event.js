@@ -1,16 +1,15 @@
 const client = require("../db");
 const nodemailer = require('nodemailer');
+const CustomError = require('../middleware/CustomError');
 
 async function getEvent() {
-  const query = "SELECT * FROM ayo_drc_schema.tablecreateevent";
-
-  let results;
   try {
-    results = await client.query(query);
-    return results.rows;
+    const query = "SELECT * FROM ayo_drc_schema.tablecreateevent";
+    const results = await client.query(query);
+    return { success: true, data: results.rows };
   } catch (e) {
     console.error(e);
-    return undefined;
+    throw new CustomError(500, "Failed to get events");
   }
 }
 
@@ -19,10 +18,10 @@ async function getEventByEmail(eventId) {
     const query =
       "SELECT * FROM ayo_drc_schema.tablecreateevent WHERE email = $1";
     const resp = await client.query(query, [eventId]);
-    return resp.rows;
+    return { success: true, data: resp.rows };
   } catch (e) {
     console.error(e);
-    return undefined;
+    throw new CustomError(500, "Failed to get events");
   }
 }
 
@@ -31,10 +30,10 @@ async function getEventByinviteeEmail(inviteeEmail) {
     const query =
       "SELECT * FROM ayo_drc_schema.tablecreateevent JOIN ayo_drc_schema.tableinviteeemail ON tablecreateevent.event_code = tableinviteeemail.event_code WHERE tableinviteeemail.invitee_email = $1";
     const resp = await client.query(query, [inviteeEmail]);
-    return resp.rows;
+    return { success: true, data: resp.rows };
   } catch (e) {
     console.error(e);
-    return undefined;
+    throw new CustomError(500, "Failed to get events");
   }
 }
 
@@ -43,10 +42,10 @@ async function getEventByEventCode(eventCode) {
     const query =
       "SELECT * FROM ayo_drc_schema.tablecreateevent WHERE event_code = $1";
     const resp = await client.query(query, [eventCode]);
-    return resp.rows;
+    return { success: true, data: resp.rows };
   } catch (e) {
     console.error(e);
-    return undefined;
+    throw new CustomError(500, "Failed to get events");
   }
 }
 
@@ -62,17 +61,24 @@ async function addEvent({
   invitee_email,
   email,
 }) {
-  
   const eventDateTime = new Date(`${event_date}T${event_time}`);
   const rsvpDeadlineDateTime = new Date(`${event_rsvp_before_date}T${event_rsvp_before_time}`);
-  
+
   if (rsvpDeadlineDateTime > eventDateTime) {
-    throw new Error("RSVP deadline cannot be later than event date and time");
+    return { success: false, message: "RSVP deadline cannot be later than event date and time" };
   }
 
-  let eventId;
   try {
     await client.query("BEGIN");
+
+    const checkEventCodeQuery =
+      "SELECT event_code FROM ayo_drc_schema.tablecreateevent WHERE event_code = $1";
+    const checkEventCodeResult = await client.query(checkEventCodeQuery, [event_code]);
+
+    if (checkEventCodeResult.rowCount > 0) {
+      throw new CustomError(400, 'Event with the same event_code already exists');
+    }
+    
 
     const insertEventQuery =
       "INSERT INTO ayo_drc_schema.tablecreateevent (event_name, event_date, event_time, event_address, event_detail, event_rsvp_before_date, event_rsvp_before_time, event_code, email) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING event_code";
@@ -89,7 +95,7 @@ async function addEvent({
     ];
     const eventResult = await client.query(insertEventQuery, eventValues);
 
-    eventCode = eventResult.rows[0].event_code;
+    const eventCode = eventResult.rows[0].event_code;
 
     if (invitee_email && invitee_email.length > 0) {
       const insertinviteeEmailQuery =
@@ -119,17 +125,17 @@ async function addEvent({
         mailOptions.to = email;
         return transporter.sendMail(mailOptions);
       });
-  
+
       await Promise.all(sendInvitationEmails);
     }
 
     await client.query("COMMIT");
 
-    return { event_id: eventId };
+    return { success: true, data: eventResult.rows };
   } catch (e) {
     await client.query("ROLLBACK");
     console.error(e);
-    return undefined;
+    throw new CustomError(500, 'Failed to add event');
   }
 }
 
@@ -158,14 +164,14 @@ async function deleteEvent(eventCode) {
       deleteInviteeEmailResult.rowCount === 0 &&
       deleteEventResult.rowCount === 0
     ) {
-      return false;
+      throw new CustomError(404, "Event not found");
     }
 
-    return true;
+    return { success: true, data: deleteEventResult.rows };
   } catch (e) {
     await client.query('ROLLBACK');
     console.error(e);
-    return undefined;
+    throw new CustomError(500, "Failed to delete event");
   } finally {
     await client.query('END');
   }
@@ -215,11 +221,11 @@ async function updateEvent(eventCode, eventData) {
 
     await client.query('COMMIT');
 
-    return { event_code: eventCode };
+    return { success: true, data: inviteeEmailValues };
   } catch (e) {
     await client.query('ROLLBACK');
     console.error(e);
-    return undefined;
+    throw new CustomError(500, "Failed to update event");
   }
 }
 
