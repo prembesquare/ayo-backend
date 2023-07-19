@@ -118,7 +118,7 @@ Your API may require authentication for certain endpoints. Make sure to include 
 
 ### Register a User
 
-**Endpoint:** `POST /your_api_base_url/user/register`
+**Endpoint:** `POST /your_api_base_url/users/register`
 
 **Description:** Register a new user.
 
@@ -142,7 +142,7 @@ Your API may require authentication for certain endpoints. Make sure to include 
 
 ### Login
 
-**Endpoint:** `POST /your_api_base_url/user/login`
+**Endpoint:** `POST /your_api_base_url/users/login`
 
 **Description:** Authenticate and log in a user.
 
@@ -168,12 +168,58 @@ Your API may require authentication for certain endpoints. Make sure to include 
     "refreshToken": "your_refresh_token"
 }
 ```
+### Forgot Password
 
-### Get User Profile
+**Endpoint**: `POST /your_api_base_url/users/forgot-password`
+**Description**: This endpoint allows users to request a password reset link. An email will be sent to the user's registered email address with instructions on how to reset their password.
 
-**Endpoint:** `GET /your_api_base_url/user/profile`
+**Request Body**:
 
-**Description:** Get the profile information of the authenticated user.
+  ```
+  {
+    "email": "user@example.com"
+  }
+  ```
+
+**Response**:
+```
+{
+    "message": "Reset password email sent successfully"
+}
+```
+
+### Update User Password
+
+**Endpoint:** `PUT /your_api_base_url/users/update`
+
+**Description:** This endpoint allows authenticated users to update their password.
+
+**Request Headers:**
+```
+Authorization: Bearer your_jwt_token_here
+```
+
+**Request Body**:
+
+ ```
+{
+    "currentPassword": "Reset#123456",
+    "newPassword": "Pass#123456"
+}
+  ```
+
+**Response:**
+```json
+{
+    "message": "Password updated successfully"
+}
+```
+
+### Logout
+
+**Endpoint:** `POST /your_api_base_url/users/update`
+
+**Description:** This endpoint allows authenticated users to log out and invalidate their access token. After logging out, the access token will no longer be valid for API requests.
 
 **Request Headers:**
 ```
@@ -183,12 +229,24 @@ Authorization: Bearer your_jwt_token_here
 **Response:**
 ```json
 {
-  "success": true,
-  "data": {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john.doe@example.com"
-  }
+    "message": "User logged out successfully"
+}
+```
+
+---
+
+## Authentication Endpoints
+
+### Refresh Token
+
+**Endpoint:** `GET /your_api_base_url/refresh`
+
+**Description:** This endpoint allows users to refresh their expired access token using a valid refresh token.
+
+**Response:**
+```json
+{
+    "accessToken": "newAccessToken"
 }
 ```
 
@@ -198,7 +256,7 @@ Authorization: Bearer your_jwt_token_here
 
 ### Get All Events
 
-**Endpoint:** `GET /your_api_base_url/event/get`
+**Endpoint:** `GET /your_api_base_url/create_event/get`
 
 **Description:** Get a list of all events.
 
@@ -237,7 +295,7 @@ Authorization: Bearer your_jwt_token_here
 
 ### Create an Event
 
-**Endpoint:** `POST /your_api_base_url/event/add`
+**Endpoint:** `POST /your_api_base_url/create_event/add`
 
 **Description:** Create a new event.
 
@@ -274,7 +332,7 @@ Authorization: Bearer your_jwt_token_here
 
 ### Get Event by Event Code
 
-**Endpoint:** `GET /your_api_base_url/event/event/:event_code`
+**Endpoint:** `GET /your_api_base_url/event/create_event/:event_code`
 
 **Description:** Get details of a specific event by its event code.
 
@@ -297,7 +355,7 @@ Authorization: Bearer your_jwt_token_here
 
 ### Update an Event
 
-**Endpoint:** `PUT /your_api_base_url/event/update/:event_code`
+**Endpoint:** `PUT /your_api_base_url/create_event/update/:event_code`
 
 **Description:** Update an existing event.
 
@@ -336,7 +394,7 @@ Authorization: Bearer your_jwt_token_here
 
 ### Delete an Event
 
-**Endpoint:** `DELETE /your_api_base_url/event/delete/:event_code`
+**Endpoint:** `DELETE /your_api_base_url/create_event/delete/:event_code`
 
 **Description:** Delete an event.
 
@@ -350,15 +408,81 @@ Authorization: Bearer your_jwt_token_here
 []
 ```
 
+### Get All Events Created By User
+
+**Endpoint**: `POST /create_event/email/:email`
+
+**Description**: This endpoint allows users to get all the events that they are invited to.
+
+**Request Headers**:
+
+```
+  {
+    "Authorization": "Bearer <access_token>"
+  }
+  ```
+
+**Response**:
+
+```
+[
+    {
+        "event_id": "1",
+        "event_name": "dinner",
+        "event_date": "2024-07-14T00:00:00.000Z",
+        "event_time": "04:08:00",
+        "event_address": "Home",
+        "event_detail": "Formal",
+        "event_rsvp_before_date": "2023-07-15T00:00:00.000Z",
+        "event_rsvp_before_time": "04:11:00",
+        "event_code": "dine",
+        "email": "john.doe@gmail.com"
+    },
+]
+```
+
+### Get All Events User Invited To
+
+**Endpoint**: `POST /create_event/invite/:invitee_email`
+
+**Description**: This endpoint allows users to get all the events that they created.
+
+**Request Headers**:
+
+```
+  {
+    "Authorization": "Bearer <access_token>"
+  }
+  ```
+
+**Response**:
+
+```
+[
+    {
+        "event_id": "1",
+        "event_name": "dinner",
+        "event_date": "2024-07-14T00:00:00.000Z",
+        "event_time": "04:08:00",
+        "event_address": "Home",
+        "event_detail": "Formal",
+        "event_rsvp_before_date": "2023-07-15T00:00:00.000Z",
+        "event_rsvp_before_time": "04:11:00",
+        "event_code": "dine",
+        "email": "mary.jane@gmail.com"
+        "invitee_id": "1",
+        "invitee_email": "john.doe@gmail.com"
+    },
+]
+```
+
 ---
 
 ## RSVP Endpoints
 
 ### RSVP for an Event
 
-**Endpoint
-
-:** `POST /your_api_base_url/rsvp/add`
+**Endpoint:** `POST /your_api_base_url/rsvp/add`
 
 **Description:** RSVP for an event.
 
