@@ -118,7 +118,7 @@ async function addEvent({
       const mailOptions = {
         from: 'ayoevents12@gmail.com',
         subject: 'You have been invited to an event',
-        html: `<p>You have been invited to the event ${event_name}. Click <a href="http://your-app.com/events/${eventCode}">here</a> to view the event.</p>`
+        html: `<p>You have been invited to the event ${event_name}!!!. Click <a href="http://youtube/events/${eventCode}">here</a> to view the event.</p>`
       };
 
       const sendInvitationEmails = invitee_email.map((email) => {
@@ -187,6 +187,7 @@ async function updateEvent(eventCode, eventData) {
       event_detail,
       event_rsvp_before_date,
       event_rsvp_before_time,
+      invitee_email,
     } = eventData;
 
     await client.query('BEGIN');
@@ -205,29 +206,90 @@ async function updateEvent(eventCode, eventData) {
     ];
     await client.query(updateEventQuery, eventValues);
 
-    if (eventData.invitee_email && eventData.invitee_email.length > 0) {
-      const insertInviteeEmailQuery =
-        'INSERT INTO ayo_drc_schema.tableinviteeemail (event_code, invitee_email) VALUES ($1, $2)';
-      const inviteeEmailValues = eventData.invitee_email.map((email) => [
-        eventCode,
-        email,
-      ]);
-      await Promise.all(
-        inviteeEmailValues.map((values) =>
-          client.query(insertInviteeEmailQuery, values)
-        )
+    if (invitee_email && invitee_email.length > 0) {
+      const existingInviteeIdsQuery =
+        'SELECT invitee_id FROM ayo_drc_schema.tableinviteeemail WHERE event_code = $1';
+      const existingInviteeIdsResult = await client.query(
+        existingInviteeIdsQuery,
+        [eventCode]
       );
+      const existingInviteeIds = existingInviteeIdsResult.rows.map(
+        (row) => row.invitee_id
+      );
+
+      // This was done to determine which invitee_id values need to be deleted and which ones need to be inserted
+      const newInviteeIds = [];
+      const deleteInviteeIds = [];
+      for (const email of invitee_email) {
+        const existingInviteeIdIndex = existingInviteeIds.indexOf(email);
+        if (existingInviteeIdIndex !== -1) {
+          // If email already exists, no need to insert, remove it from the existing list
+          existingInviteeIds.splice(existingInviteeIdIndex, 1);
+        } else {
+          // If its new email, insert it
+          newInviteeIds.push(email);
+        }
+      }
+      deleteInviteeIds.push(...existingInviteeIds);
+
+      // Then here delete the invitee_id values that are no longer needed from the tablersvp table
+      if (deleteInviteeIds.length > 0) {
+        const deleteRsvpQuery =
+          'DELETE FROM ayo_drc_schema.tablersvp WHERE invitee_id = ANY($1)';
+        await client.query(deleteRsvpQuery, [deleteInviteeIds]);
+      }
+
+      // Delete the invitee_id values that are no longer needed from the tableinviteeemail table
+      if (deleteInviteeIds.length > 0) {
+        const deleteInviteeEmailQuery =
+          'DELETE FROM ayo_drc_schema.tableinviteeemail WHERE invitee_id = ANY($1)';
+        await client.query(deleteInviteeEmailQuery, [deleteInviteeIds]);
+      }
+
+      // Next insert new invitee_id values
+      if (newInviteeIds.length > 0) {
+        const insertInviteeEmailQuery =
+          'INSERT INTO ayo_drc_schema.tableinviteeemail (event_code, invitee_email) VALUES ($1, $2)';
+        const inviteeEmailValues = newInviteeIds.map((email) => [eventCode, email]);
+        await Promise.all(
+          inviteeEmailValues.map((values) =>
+            client.query(insertInviteeEmailQuery, values)
+          )
+        );
+      }
+
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+          user: 'ayoevents12@gmail.com',
+          pass: 'zvtnlzqbugvqhumj',
+        },
+      });
+
+      const mailOptions = {
+        from: 'ayoevents12@gmail.com',
+        subject: 'You have been invited to an event',
+        html: `<p>There's been some change to the event ${event_name}. Click <a href="http://youtube.com.my">here</a> to view the event.</p>`,
+      };
+
+      const sendInvitationEmails = invitee_email.map((email) => {
+        mailOptions.to = email;
+        return transporter.sendMail(mailOptions);
+      });
+
+      await Promise.all(sendInvitationEmails);
     }
 
     await client.query('COMMIT');
 
-    return { success: true, data: inviteeEmailValues };
+    return { success: true, data: eventData };
   } catch (e) {
     await client.query('ROLLBACK');
     console.error(e);
-    throw new CustomError(500, "Failed to update event");
+    throw new CustomError(500, 'Failed to update event');
   }
 }
+
 
 module.exports = {
   getEvent,
