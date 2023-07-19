@@ -106,7 +106,7 @@ async function deleteEvent(req, res) {
   }
 }
 
-async function updateEvent(req, res) {
+async function updateEvent(req, res, next) {
   try {
     const eventCode = req.params.event_code;
     const eventData = req.body;
@@ -121,6 +121,7 @@ async function updateEvent(req, res) {
     next(error);
   }
 }
+
 
 module.exports = {
   getEvent,

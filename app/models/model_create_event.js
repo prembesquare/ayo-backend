@@ -285,8 +285,14 @@ async function updateEvent(eventCode, eventData) {
     return { success: true, data: eventData };
   } catch (e) {
     await client.query('ROLLBACK');
-    console.error(e);
-    throw new CustomError(500, 'Failed to update event');
+
+    if (e.constraint === 'tableinviteeemail_event_code_fkey') {
+      // Handle foreign key constraint violation
+      throw new CustomError(404, 'Event with the specified event_code not found.');
+    } else {
+      console.error(e);
+      throw new CustomError(500, 'Failed to update event');
+    }
   }
 }
 
