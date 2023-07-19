@@ -10,6 +10,7 @@ Sure, I can help you link the titles to their respective divisions. Here's the m
 4. [Database Setup](#database-setup)
    - [Docker and PostgreSQL](#docker-and-postgresql)
    - [Initialize the Database](#initialize-the-database)
+   - [Configuration .env File](#configuration-.env-file)
 5. [Running the Application](#running-the-application)
    - [Using the Makefile](#using-the-makefile)
    - [Manually Running Containers](#manually-running-containers)
@@ -72,6 +73,16 @@ To initialize the database, run the following command inside the project directo
 ```
 make build
 ```
+
+### Configuration .env File
+
+Rename the example environment file to .env:
+
+```
+cp .env.example
+```
+
+Replace the placeholder values in the `.env` file with your actual configurations.
 
 ## Running the Application
 

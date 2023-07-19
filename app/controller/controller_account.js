@@ -86,13 +86,13 @@ async function forgetPassword(req, res, next) {
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
-        user: "ayoevents12@gmail.com",
+        user: process.env.EMAIL,
         pass: process.env.EMAIL_KEY,
       },
     });
 
     const mailOptions = {
-      from: "ayoevents12@gmail.com",
+      from: process.env.EMAIL,
       to: email,
       subject: "Password Reset Request",
       text: `You have requested to reset your password. Your temporary password is: ${temporaryPassword}. Please log in and change your password immediately.`,
