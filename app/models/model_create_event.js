@@ -111,7 +111,7 @@ async function addEvent({
         service: "Gmail",
         auth: {
           user: "ayoevents12@gmail.com",
-          pass: "zvtnlzqbugvqhumj",
+          pass: process.env.EMAIL_KEY,
         },
       });
 
@@ -262,7 +262,7 @@ async function updateEvent(eventCode, eventData) {
         service: 'Gmail',
         auth: {
           user: 'ayoevents12@gmail.com',
-          pass: 'zvtnlzqbugvqhumj',
+          pass: process.env.EMAIL_KEY,
         },
       });
 

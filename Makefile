@@ -1,4 +1,5 @@
 install:
+	npm install
 	npm init -y
 	npm install express
 	npm install pg
